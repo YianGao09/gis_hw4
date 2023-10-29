@@ -1,0 +1,74 @@
+---
+title: "hw4"
+output: html_document
+date: "2023-10-28"
+---
+
+```{r setup, include=FALSE}
+library(RSQLite)
+library(rgdal)
+
+#library(countrycode) 用来代码转换的包
+
+
+```
+导入shapefile和csv
+```{r}
+#shapefile
+library(sf)
+shape <- st_read("/Users/gaoyian/Desktop/GIS/hw4 shapefile")
+summary(shape)
+#导入csv
+library(tidyverse)
+report <- read_csv("/Users/gaoyian/Desktop/GIS homework/Data/hw4_HDR21-22_Composite_indices_complete_time_series.csv")
+```
+
+```{r}
+library(tidyverse)
+library(here)
+library(sf)
+library(janitor)
+library(tmap)
+
+library(remotes)
+
+
+```
+
+```{r}
+library(dplyr)
+report_new <- report %>%
+  clean_names(.)%>% 
+  select(iso3, country, gii_2010,gii_2019)%>%
+  na.omit()%>%
+  mutate(difference=(gii_2019-gii_2010))%>%
+  reframe(iso3, country, gii_2010, gii_2019, difference)
+#report_new
+
+#数据汇总，不用summarise，summarise适合算mean什么的
+```
+leftjoin
+```{r}
+joined_data <- shape %>%
+  #clean_names() %>% #clean_names不与shapefile兼容，是用来清理dataframe的，所以不行
+   
+  left_join(.,
+            report_new ,
+            by = c("COUNTRY" = "country"))%>%
+  na.omit()#这个放在这就没有NA了
+
+```
+
+```{r}
+library(tmap)
+library(tmaptools)
+tmap_mode("plot")
+
+
+map <- joined_data %>% 
+  tm_shape(.) + 
+  tm_fill(col = 'difference', midpoint = NA) +
+  tm_layout(title = 'Gender Inequality Index difference')
+map
+```
+
