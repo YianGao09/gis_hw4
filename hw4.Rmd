@@ -70,6 +70,6 @@ map <- joined_data %>%
   tm_fill(col = 'difference', midpoint = NA) +
   tm_layout(title = 'Gender Inequality Index difference')
 map
-#testiiii
+
 ```
 
